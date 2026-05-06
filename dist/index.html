@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Friends 25</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            color: #f7f7f7;
+            background: #070b10;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        #game {
+            position: fixed;
+            inset: 0;
+            background: #070b10;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #menu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: radial-gradient(circle at 50% 35%, rgba(40, 52, 68, 0.92), rgba(5, 9, 14, 0.98));
+            pointer-events: auto;
+        }
+
+        .panel {
+            width: min(720px, calc(100vw - 32px));
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(10, 16, 24, 0.86);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 44px;
+            line-height: 1;
+        }
+
+        p {
+            margin: 0 0 22px;
+            color: #aab6c4;
+            line-height: 1.45;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            color: #c8d4e2;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        select,
+        button {
+            min-height: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #f7f7f7;
+            background: #121b26;
+            font: inherit;
+        }
+
+        select {
+            padding: 0 12px;
+        }
+
+        button {
+            width: 100%;
+            cursor: pointer;
+            background: #e10600;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #ff2a22;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            color: #dce7f5;
+            font-size: 13px;
+        }
+
+        .controls span {
+            padding: 7px 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        #hud {
+            padding: 14px;
+        }
+
+        #topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            pointer-events: none;
+        }
+
+        #session-info,
+        #fastest-lap {
+            padding: 9px 12px;
+            background: rgba(2, 6, 11, 0.62);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        #player-hud {
+            position: fixed;
+            left: 14px;
+            top: 62px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .driver-card {
+            min-width: 250px;
+            display: grid;
+            gap: 2px;
+            padding: 10px 12px;
+            background: rgba(2, 6, 11, 0.68);
+            border-left: 4px solid #e10600;
+        }
+
+        .driver-card span,
+        .driver-card em {
+            color: #c9d6e2;
+            font-size: 13px;
+            font-style: normal;
+        }
+
+        #telemetry {
+            position: fixed;
+            left: 50%;
+            bottom: 16px;
+            transform: translateX(-50%);
+            width: min(760px, calc(100vw - 28px));
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .telemetry-card {
+            width: min(360px, 100%);
+            display: grid;
+            gap: 8px;
+            padding: 12px;
+            background: linear-gradient(180deg, rgba(3, 7, 13, 0.88), rgba(6, 12, 20, 0.72));
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+        }
+
+        .telemetry-card.dnf {
+            border-color: rgba(255, 32, 32, 0.58);
+            background: linear-gradient(180deg, rgba(52, 2, 4, 0.9), rgba(9, 7, 9, 0.76));
+        }
+
+        .telemetry-top,
+        .telemetry-bottom,
+        .telemetry-flags {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .driver-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .race-state {
+            color: #bac6d5;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .telemetry-core {
+            display: grid;
+            grid-template-columns: 1fr 86px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .speed-readout {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .speed-readout strong {
+            font-size: 56px;
+            line-height: 0.9;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .speed-readout span {
+            color: #aeb9c7;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .gear-readout {
+            display: grid;
+            place-items: center;
+            min-height: 72px;
+            background: #f4f7fb;
+            color: #090d12;
+            font-size: 52px;
+            font-weight: 950;
+            line-height: 1;
+        }
+
+        .rpm-lights {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+        }
+
+        .rpm-light {
+            height: 9px;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .rpm-light.on {
+            background: #42f56f;
+            box-shadow: 0 0 12px rgba(66, 245, 111, 0.8);
+        }
+
+        .rpm-light.hot {
+            background: #ff2348;
+            box-shadow: 0 0 12px rgba(255, 35, 72, 0.88);
+        }
+
+        .status-pill {
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #dfe8f4;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .status-pill.active {
+            background: #f6d32d;
+            color: #151009;
+        }
+
+        .status-pill.warn {
+            background: #ff3c38;
+            color: #fff;
+        }
+
+        .meter {
+            display: grid;
+            gap: 3px;
+            min-width: 86px;
+            color: #aeb9c7;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .meter-track {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.13);
+            overflow: hidden;
+        }
+
+        .meter-track span {
+            display: block;
+            height: 100%;
+            width: var(--value, 0%);
+            background: #2bd45c;
+        }
+
+        .meter.brake .meter-track span {
+            background: #ff453a;
+        }
+
+        .meter.damage .meter-track span {
+            background: #ffb020;
+        }
+
+        #standings {
+            position: fixed;
+            right: 14px;
+            top: 62px;
+            width: 250px;
+            display: grid;
+            gap: 4px;
+            padding: 10px;
+            background: rgba(2, 6, 11, 0.66);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        #standings div {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        #lights {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 18px;
+            background: rgba(0, 0, 0, 0.26);
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .light-row {
+            display: flex;
+            gap: 14px;
+            padding: 18px 22px;
+            background: rgba(0, 0, 0, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .start-light {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #241111;
+            border: 2px solid #5a1c1c;
+            box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.8);
+        }
+
+        .start-light.on {
+            background: #ff1616;
+            box-shadow: 0 0 28px rgba(255, 22, 22, 0.85);
+        }
+
+        .light-caption,
+        .finish-card {
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 28px;
+        }
+
+        .finish-card span {
+            display: block;
+            margin-top: 8px;
+            color: #d3dde8;
+            font-size: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 760px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #standings {
+                display: none;
+            }
+
+            #player-hud {
+                display: none;
+            }
+
+            #telemetry {
+                bottom: 10px;
+            }
+
+            .telemetry-card {
+                padding: 10px;
+            }
+
+            .speed-readout strong {
+                font-size: 42px;
+            }
+
+            .gear-readout {
+                min-height: 58px;
+                font-size: 42px;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-C2CSgfsY.js"></script>
+</head>
+<body>
+    <div id="game"></div>
+    <div id="menu" class="overlay"></div>
+    <div id="hud" class="overlay hidden">
+        <div id="topbar">
+            <div id="session-info"></div>
+            <div id="fastest-lap"></div>
+        </div>
+        <div id="standings"></div>
+        <div id="player-hud"></div>
+        <div id="telemetry"></div>
+    </div>
+    <div id="lights" class="overlay hidden"></div>
+</body>
+</html>

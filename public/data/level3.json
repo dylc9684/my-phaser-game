@@ -1,0 +1,186 @@
+{
+    "startingSun": 100,
+    "defaultSeed": "peashooter",
+    "grid": {
+        "rows": 5,
+        "cols": 9,
+        "cellWidth": 80,
+        "cellHeight": 100,
+        "originX": 100,
+        "originY": 120
+    },
+    "skyDrops": {
+        "amount": 25,
+        "initialDelay": 3000,
+        "interval": 7600,
+        "minX": 120,
+        "maxX": 760,
+        "startY": -20,
+        "minGroundY": 245,
+        "maxGroundY": 520,
+        "fallDuration": 4800
+    },
+    "plants": {
+        "sunflower": {
+            "role": "producer",
+            "displayName": "Sunflower",
+            "texture": "sunflower",
+            "cost": 50,
+            "health": 100,
+            "scale": 0.78,
+            "production": {
+                "currency": "sun",
+                "amount": 25,
+                "interval": 9000
+            }
+        },
+        "peashooter": {
+            "role": "attacker",
+            "displayName": "Peashooter",
+            "texture": "peashooter",
+            "cost": 50,
+            "health": 100,
+            "scale": 0.72,
+            "attack": {
+                "fireRate": 1400,
+                "targeting": "lane-ahead",
+                "projectile": "pea",
+                "muzzleOffset": {
+                    "x": 28,
+                    "y": -4
+                }
+            }
+        },
+        "walnut": {
+            "role": "defender",
+            "displayName": "Walnut",
+            "texture": "walnut",
+            "cost": 50,
+            "health": 300,
+            "scale": 0.78
+        }
+    },
+    "projectiles": {
+        "pea": {
+            "texture": "pea",
+            "damage": 20,
+            "speed": 300,
+            "radius": 8,
+            "cleanupX": 840
+        }
+    },
+    "enemies": {
+        "basicZombie": {
+            "texture": "zombie",
+            "health": 70,
+            "scale": 0.82,
+            "speed": -50,
+            "dps": 20,
+            "attackRate": 1000,
+            "spawnX": 850,
+            "loseX": 0
+        },
+        "runnerZombie": {
+            "texture": "runnerZombie",
+            "health": 55,
+            "scale": 0.82,
+            "speed": -60,
+            "dps": 18,
+            "attackRate": 900,
+            "spawnX": 850,
+            "loseX": 0
+        }
+    },
+    "waves": [
+        {
+            "delayBefore": 15000,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 1800, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 3600, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 },
+                { "at": 5400, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 },
+                { "at": 1600, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 3200, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 2 },
+                { "at": 4800, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 6400, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 8000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 8500,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 0 },
+                { "at": 1450, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 2900, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 4350, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 5800, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 3 },
+                { "at": 7250, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 8700, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 2 },
+                { "at": 10150, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 8000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 2 },
+                { "at": 1300, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 2600, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 3 },
+                { "at": 3900, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 5200, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 },
+                { "at": 6500, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 7800, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 0 },
+                { "at": 9100, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 10400, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 11700, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 7500,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 1150, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 },
+                { "at": 2300, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 3450, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 3 },
+                { "at": 4600, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 5750, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 2 },
+                { "at": 6900, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 8050, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 0 },
+                { "at": 9200, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 10350, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 11500, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 12650, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 0,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 0 },
+                { "at": 1000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 2000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 3000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 3 },
+                { "at": 4000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 5000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 2 },
+                { "at": 6000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 7000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 1 },
+                { "at": 8000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 9000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 3 },
+                { "at": 10000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 11000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 4 },
+                { "at": 12000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 13000, "event": "spawn_zombie", "enemy": "runnerZombie", "row": 0 }
+            ]
+        }
+    ]
+}

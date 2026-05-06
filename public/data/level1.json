@@ -1,0 +1,135 @@
+{
+    "startingSun": 50,
+    "defaultSeed": "peashooter",
+    "grid": {
+        "rows": 5,
+        "cols": 9,
+        "cellWidth": 80,
+        "cellHeight": 100,
+        "originX": 100,
+        "originY": 120
+    },
+    "skyDrops": {
+        "amount": 25,
+        "initialDelay": 3500,
+        "interval": 8500,
+        "minX": 120,
+        "maxX": 760,
+        "startY": -20,
+        "minGroundY": 245,
+        "maxGroundY": 520,
+        "fallDuration": 5200
+    },
+    "plants": {
+        "sunflower": {
+            "role": "producer",
+            "displayName": "Sunflower",
+            "texture": "sunflower",
+            "cost": 50,
+            "health": 100,
+            "scale": 0.78,
+            "production": {
+                "currency": "sun",
+                "amount": 25,
+                "interval": 9000
+            }
+        },
+        "peashooter": {
+            "role": "attacker",
+            "displayName": "Peashooter",
+            "texture": "peashooter",
+            "cost": 50,
+            "health": 100,
+            "scale": 0.72,
+            "attack": {
+                "fireRate": 1400,
+                "targeting": "lane-ahead",
+                "projectile": "pea",
+                "muzzleOffset": {
+                    "x": 28,
+                    "y": -4
+                }
+            }
+        }
+    },
+    "projectiles": {
+        "pea": {
+            "texture": "pea",
+            "damage": 20,
+            "speed": 300,
+            "radius": 8,
+            "cleanupX": 840
+        }
+    },
+    "enemies": {
+        "basicZombie": {
+            "texture": "zombie",
+            "health": 60,
+            "scale": 0.82,
+            "speed": -50,
+            "dps": 20,
+            "attackRate": 1000,
+            "spawnX": 850,
+            "loseX": 0
+        }
+    },
+    "waves": [
+        {
+            "delayBefore": 18000,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 4200, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 3600, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 7200, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 9000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 3000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 6000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 9000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 8000,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 2600, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 5200, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 7800, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 10400, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 }
+            ]
+        },
+        {
+            "delayBefore": 0,
+            "breakAfter": 0,
+            "spawns": [
+                { "at": 0, "event": "spawn_zombie", "enemy": "basicZombie", "row": 0 },
+                { "at": 2200, "event": "spawn_zombie", "enemy": "basicZombie", "row": 1 },
+                { "at": 4400, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 },
+                { "at": 6600, "event": "spawn_zombie", "enemy": "basicZombie", "row": 3 },
+                { "at": 8800, "event": "spawn_zombie", "enemy": "basicZombie", "row": 4 },
+                { "at": 11000, "event": "spawn_zombie", "enemy": "basicZombie", "row": 2 }
+            ]
+        }
+    ]
+}

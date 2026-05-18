@@ -655,9 +655,6 @@ class RaceCar {
         this.trackLimitCooldown = 0;
         this.damage = 0;
         this.damageCooldown = 0;
-        this.spinTimer = 0;
-        this.spinCooldown = 0;
-        this.spinDirection = 1;
         this.slipstream = false;
         this.drsActive = false;
         this.drsAvailable = false;
@@ -695,6 +692,7 @@ class FormulaFriendsGame {
         this.scene = null;
         this.track = null;
         this.cars = [];
+        this.playerCars = [];
         this.cameras = [];
         this.playerCount = 1;
         this.cameraMode = 'tvpod';
@@ -757,6 +755,7 @@ class FormulaFriendsGame {
 
     startRaceFromMenu() {
         this.playerCount = Number(this.menu.querySelector('#mode-select').value);
+        document.body.classList.toggle('split-screen', this.playerCount === 2);
         this.trackIndex = Number(this.menu.querySelector('#track-select').value);
         this.cameraMode = this.menu.querySelector('#camera-select').value;
         this.playerNames = [
@@ -807,21 +806,16 @@ class FormulaFriendsGame {
     }
 
     buildCars() {
-        const controlledNames = this.playerCount === 2 ? this.playerNames : [this.playerNames[0]];
-        const roster = FRIEND_DRIVERS.map((driver) => ({
-            ...driver,
-            controlledBy: controlledNames.indexOf(driver.name)
+        const controlledNames = (this.playerCount === 2 ? this.playerNames : [this.playerNames[0]]).slice(0, this.playerCount);
+        const controlledDrivers = controlledNames.map((name, playerIndex) => ({
+            ...FRIEND_DRIVERS.find((driver) => driver.name === name),
+            controlledBy: playerIndex
         }));
-        const randomizedGrid = shuffle(roster).slice(0, FIELD_SIZE);
-
-        controlledNames.forEach((name, playerIndex) => {
-            if (!randomizedGrid.some((driver) => driver.name === name)) {
-                randomizedGrid[randomizedGrid.length - 1 - playerIndex] = {
-                    ...FRIEND_DRIVERS.find((driver) => driver.name === name),
-                    controlledBy: playerIndex
-                };
-            }
-        });
+        const cpuDrivers = shuffle(FRIEND_DRIVERS
+            .filter((driver) => !controlledNames.includes(driver.name))
+            .map((driver) => ({ ...driver, controlledBy: -1 })))
+            .slice(0, FIELD_SIZE - controlledDrivers.length);
+        const randomizedGrid = shuffle([...controlledDrivers, ...cpuDrivers]);
 
         this.cars = randomizedGrid.map((driver, gridIndex) => {
             const car = new RaceCar(driver, gridIndex, driver.controlledBy >= 0 ? driver.controlledBy : null);
@@ -837,6 +831,9 @@ class FormulaFriendsGame {
             this.placeCar(car);
             return car;
         });
+        this.playerCars = this.cars
+            .filter((car) => car.controlledBy !== null)
+            .sort((a, b) => a.controlledBy - b.controlledBy);
     }
 
     showLightsSequence() {
@@ -913,8 +910,6 @@ class FormulaFriendsGame {
         car.contactCooldown = Math.max(0, car.contactCooldown - dt);
         car.trackLimitCooldown = Math.max(0, car.trackLimitCooldown - dt);
         car.damageCooldown = Math.max(0, car.damageCooldown - dt);
-        car.spinCooldown = Math.max(0, car.spinCooldown - dt);
-        car.spinTimer = Math.max(0, car.spinTimer - dt);
 
         const curvature = this.track.curvature(car.progress + 42);
         const cornerLimit = clamp(76 - curvature * 230, 34, 84);
@@ -998,12 +993,6 @@ class FormulaFriendsGame {
         car.advanceSpeed = car.speed * forwardFactor;
         car.lateral += lateralVelocity * dt;
 
-        if (car.spinTimer > 0) {
-            car.heading = normalizeAngle(car.heading + car.spinDirection * (2.4 + car.speed * 0.018) * dt);
-            car.advanceSpeed *= 0.48;
-            car.speed *= 1 - 0.22 * dt;
-        }
-
         if (overspeed > 0) {
             const outside = Math.sign(car.lateral || -Math.sin(angleToTrack) || 1);
             car.lateral += outside * overspeed * 0.045 * dt;
@@ -1014,22 +1003,11 @@ class FormulaFriendsGame {
 
         if (car.offTrack) {
             const gravelDepth = Math.min(1, (Math.abs(car.lateral) - halfWidth) / PLAYER_OFFROAD_MARGIN);
-            const instability = Math.sin(this.raceTime * 15 + car.index * 0.7) * 0.7 + car.steerInput * 0.9;
-            car.heading = normalizeAngle(car.heading + instability * (0.3 + gravelDepth * 1.15) * dt);
-            car.lateral += Math.sign(car.lateral || 1) * gravelDepth * car.speed * 0.12 * dt;
+            car.lateral += Math.sign(car.lateral || 1) * gravelDepth * car.speed * 0.05 * dt;
 
             if (this.isCornerCut(car, signedCorner, halfWidth) && car.trackLimitCooldown === 0) {
                 car.penaltySeconds += 2;
                 car.trackLimitCooldown = 5;
-            }
-
-            if (car.spinCooldown === 0 && car.spinTimer === 0 && car.speed > 48 && gravelDepth > 0.26) {
-                const risk = (gravelDepth * 0.42 + Math.abs(car.steerInput) * 0.32 + Math.max(0, car.speed - 54) * 0.004) * dt;
-                if (Math.random() < risk) {
-                    car.spinTimer = 0.9 + gravelDepth * 0.7;
-                    car.spinCooldown = 5;
-                    car.spinDirection = Math.sign(car.steerInput || car.lateral || 1);
-                }
             }
         }
 
@@ -1318,15 +1296,17 @@ class FormulaFriendsGame {
     }
 
     updateCameras() {
-        const players = this.cars
-            .filter((car) => car.controlledBy !== null)
-            .sort((a, b) => a.controlledBy - b.controlledBy);
+        const players = this.getPlayerCars();
         const leader = [...this.cars].sort((a, b) => a.rank - b.rank)[0];
 
         players.forEach((car, index) => {
             const camera = this.cameras[index];
             this.positionCamera(camera, car, leader);
         });
+    }
+
+    getPlayerCars() {
+        return this.playerCars.slice(0, this.playerCount);
     }
 
     positionCamera(camera, car, leader) {
@@ -1376,11 +1356,11 @@ class FormulaFriendsGame {
     renderRace() {
         const width = this.renderer.domElement.width;
         const height = this.renderer.domElement.height;
-        const players = this.playerCount;
+        const players = this.getPlayerCars();
 
         this.renderer.clear();
 
-        if (players === 2) {
+        if (this.playerCount === 2) {
             const half = Math.floor(width / 2);
             this.renderViewport(this.cameras[0], 0, 0, half, height);
             this.renderViewport(this.cameras[1], half, 0, width - half, height);
@@ -1414,7 +1394,6 @@ class FormulaFriendsGame {
         const team = getTeam(car.driver.team);
         const statusFlags = [
             car.dnf ? 'DNF' : null,
-            car.spinTimer > 0 ? 'Spin' : null,
             car.drsActive ? 'DRS' : null,
             car.slipstream ? 'Slipstream' : null,
             car.offTrack ? 'Off track' : null,
@@ -1453,9 +1432,7 @@ class FormulaFriendsGame {
             return;
         }
 
-        const playerCars = this.cars
-            .filter((car) => car.controlledBy !== null)
-            .sort((a, b) => a.controlledBy - b.controlledBy);
+        const playerCars = this.getPlayerCars();
         this.sessionInfo.textContent = `${this.track.name} · ${LAPS_PER_RACE} longer laps · ${this.playerCount === 2 ? '2P Splitscreen' : 'Singleplayer'} · Camera: ${CAMERA_MODES[this.cameraMode]}`;
         this.fastestLapEl.textContent = this.fastestLap.driver
             ? `Fastest lap: ${this.fastestLap.driver} ${this.fastestLap.time.toFixed(2)}`
@@ -1468,7 +1445,6 @@ class FormulaFriendsGame {
                 car.drsActive ? 'DRS' : null,
                 car.slipstream ? 'SLIP' : null,
                 car.offTrack ? 'OFF TRACK' : null,
-                car.spinTimer > 0 ? 'SPIN' : null,
                 car.dnf ? `DNF ${car.dnfReason}` : null,
                 car.penaltySeconds ? `+${car.penaltySeconds.toFixed(0)}s` : null
             ].filter(Boolean).join(' · ');

@@ -22,6 +22,8 @@ pnpm-debug.log*
 # Test and coverage output
 coverage/
 .nyc_output/
+__pycache__/
+*.pyc
 
 # Vite and tool caches
 .vite/
